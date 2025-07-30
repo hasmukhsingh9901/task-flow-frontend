@@ -5,7 +5,7 @@ import { setUser } from './store/slices/authSlice';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
-import Login from './components/login';
+import SignIn from './components/SignIn';
 import Register from './components/Register';
 import TaskList from './components/TaskList';
 import AdminDashboard from './components/AdminDashboard';
@@ -34,7 +34,7 @@ function App() {
         <Navbar />
         <div className="container mx-auto p-4">
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<SignIn />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route
