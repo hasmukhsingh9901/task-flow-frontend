@@ -5,7 +5,7 @@ import { setUser } from './store/slices/authSlice';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
-import Login from './components/Login';
+import Login from "./components/Login"
 import Register from './components/Register';
 import TaskList from './components/TaskList';
 import AdminDashboard from './components/AdminDashboard';
