@@ -1,30 +1,36 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../store/slices/authSlice';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('user');
-  const [error, setError] = useState('');
-  const { register } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await register(username, email, password, role);
-    if (result.success) {
+    const result = await dispatch(registerUser({ username, email, password, role }));
+    if (result.meta.requestStatus === 'fulfilled') {
+      toast.success('Registration successful! Please login.');
       navigate('/login');
-    } else {
-      setError(result.message);
     }
   };
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Register</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700">Username</label>
@@ -34,6 +40,7 @@ const Register = () => {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full p-2 border rounded"
             required
+            disabled={loading}
           />
         </div>
         <div className="mb-4">
@@ -44,6 +51,7 @@ const Register = () => {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-2 border rounded"
             required
+            disabled={loading}
           />
         </div>
         <div className="mb-4">
@@ -54,6 +62,7 @@ const Register = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-2 border rounded"
             required
+            disabled={loading}
           />
         </div>
         <div className="mb-4">
@@ -62,13 +71,18 @@ const Register = () => {
             value={role}
             onChange={(e) => setRole(e.target.value)}
             className="w-full p-2 border rounded"
+            disabled={loading}
           >
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
-          Register
+        <button 
+          type="submit" 
+          className="bg-blue-600 text-white px-4 py-2 rounded w-full disabled:opacity-50"
+          disabled={loading}
+        >
+          {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
     </div>

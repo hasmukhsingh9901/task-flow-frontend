@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector((state) => state.auth);
 
   return (
     <div className="text-center">

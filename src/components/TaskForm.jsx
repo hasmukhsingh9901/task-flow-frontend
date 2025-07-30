@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
-import { useContext } from 'react';
-import { TaskContext } from '../context/TaskContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { createTask, updateTask } from '../store/slices/taskSlice';
+import { toast } from 'react-toastify';
 
 const TaskForm = ({ task = {}, onClose }) => {
   const [title, setTitle] = useState(task.title || '');
   const [description, setDescription] = useState(task.description || '');
   const [status, setStatus] = useState(task.status || 'incomplete');
-  const { createTask, updateTask } = useContext(TaskContext);
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.tasks);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const taskData = { title, description, status };
-    if (task._id) {
-      await updateTask(task._id, taskData);
-    } else {
-      await createTask(taskData);
+    
+    try {
+      if (task._id) {
+        await dispatch(updateTask({ taskId: task._id, taskData }));
+        toast.success('Task updated successfully');
+      } else {
+        await dispatch(createTask(taskData));
+        toast.success('Task created successfully');
+      }
+      onClose();
+    } catch (error) {
+      toast.error('Failed to save task');
     }
-    onClose();
   };
 
   return (
@@ -30,6 +39,7 @@ const TaskForm = ({ task = {}, onClose }) => {
           onChange={(e) => setTitle(e.target.value)}
           className="w-full p-2 border rounded"
           required
+          disabled={loading}
         />
       </div>
       <div className="mb-4">
@@ -38,6 +48,7 @@ const TaskForm = ({ task = {}, onClose }) => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full p-2 border rounded"
+          disabled={loading}
         />
       </div>
       <div className="mb-4">
@@ -46,16 +57,26 @@ const TaskForm = ({ task = {}, onClose }) => {
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-full p-2 border rounded"
+          disabled={loading}
         >
           <option value="incomplete">Incomplete</option>
           <option value="completed">Completed</option>
         </select>
       </div>
       <div className="flex space-x-2">
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          {task._id ? 'Update' : 'Create'}
+        <button 
+          type="submit" 
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          disabled={loading}
+        >
+          {loading ? 'Saving...' : (task._id ? 'Update' : 'Create')}
         </button>
-        <button type="button" onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">
+        <button 
+          type="button" 
+          onClick={onClose} 
+          className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          disabled={loading}
+        >
           Cancel
         </button>
       </div>

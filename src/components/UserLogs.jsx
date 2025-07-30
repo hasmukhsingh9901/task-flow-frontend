@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserLogs, deleteUserLog } from '../store/slices/userSlice';
+import { toast } from 'react-toastify';
 
 const UserLogs = () => {
-  const [logs, setLogs] = useState([]);
+  const dispatch = useDispatch();
+  const { logs, loading, error } = useSelector((state) => state.users);
 
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const res = await axios.get('http://localhost:8000/auth/v1/user-logs');
-        setLogs(res.data);
-      } catch (error) {
-        console.error('Failed to fetch logs:', error);
-      }
-    };
-    fetchLogs();
-  }, []);
+    dispatch(fetchUserLogs());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleDelete = async (logId) => {
     if (window.confirm('Are you sure you want to delete this log?')) {
-      try {
-        await axios.delete(`http://localhost:8000/auth/v1/user-logs/${logId}`);
-        setLogs(logs.filter((log) => log._id !== logId));
-      } catch (error) {
-        console.error('Failed to delete log:', error);
+      const result = await dispatch(deleteUserLog(logId));
+      if (result.meta.requestStatus === 'fulfilled') {
+        toast.success('Log deleted successfully');
       }
     }
   };
@@ -30,39 +29,46 @@ const UserLogs = () => {
   return (
     <div>
       <h3 className="text-xl font-bold mb-2">User Logs</h3>
-      <table className="w-full bg-white rounded shadow">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="p-2">Username</th>
-            <th className="p-2">Role</th>
-            <th className="p-2">Login Time</th>
-            <th className="p-2">Logout Time</th>
-            <th className="p-2">Token Name</th>
-            <th className="p-2">IP Address</th>
-            <th className="p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log) => (
-            <tr key={log._id} className="border-t">
-              <td className="p-2">{log.username}</td>
-              <td className="p-2">{log.role}</td>
-              <td className="p-2">{new Date(log.loginTime).toLocaleString()}</td>
-              <td className="p-2">{log.logoutTime ? new Date(log.logoutTime).toLocaleString() : '-'}</td>
-              <td className="p-2">{log.tokenName}</td>
-              <td className="p-2">{log.ipAddress}</td>
-              <td className="p-2">
-                <button
-                  onClick={() => handleDelete(log._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
-              </td>
+      {loading ? (
+        <div className="text-center py-8">
+          <div className="text-xl">Loading logs...</div>
+        </div>
+      ) : (
+        <table className="w-full bg-white rounded shadow">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2">Username</th>
+              <th className="p-2">Role</th>
+              <th className="p-2">Login Time</th>
+              <th className="p-2">Logout Time</th>
+              <th className="p-2">Token Name</th>
+              <th className="p-2">IP Address</th>
+              <th className="p-2">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {logs.map((log) => (
+              <tr key={log._id} className="border-t">
+                <td className="p-2">{log.username}</td>
+                <td className="p-2">{log.role}</td>
+                <td className="p-2">{new Date(log.loginTime).toLocaleString()}</td>
+                <td className="p-2">{log.logoutTime ? new Date(log.logoutTime).toLocaleString() : '-'}</td>
+                <td className="p-2">{log.tokenName}</td>
+                <td className="p-2">{log.ipAddress}</td>
+                <td className="p-2">
+                  <button
+                    onClick={() => handleDelete(log._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded disabled:opacity-50"
+                    disabled={loading}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
