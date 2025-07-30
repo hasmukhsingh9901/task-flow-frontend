@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://task-flow-backend-3816.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 
 // Create axios instance with default config
 const api = axios.create({
